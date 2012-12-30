@@ -9,7 +9,7 @@ to let you access any subgroup or dataset.
 H5View is based on the h5py package.
 
 Usage
-=====
+-----
 
     import h5view
     with h5view.open('test.h5') as f:
@@ -31,7 +31,7 @@ attributes) of the file or any item (group/dataset), making it quite
 convenient to interactively explore a HDF5 file.
 
 Installation
-============
+------------
 
 The code is only in `h5view.py`. The `create.py` file is used to create
 a test HDF5 file.
