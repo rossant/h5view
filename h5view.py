@@ -184,13 +184,13 @@ class File(Item):
     # I/O methods
     # -----------
     def open(self, filename=None):
-        """Open the file."""
+        """Open the file in read-only mode."""
         if filename is None:
             filename = self.filename
         else:
             self.filename = filename
         if self.f is None and filename is not None:
-            self.f = h5py.File(filename)
+            self.f = h5py.File(filename, 'r')
             self._visit()
             
     def close(self):
