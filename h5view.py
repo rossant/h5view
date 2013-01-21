@@ -65,12 +65,16 @@ def format_size(num_bytes):
     
 class Item(object):
     """Represents a group or a dataset in the file."""
-    def __init__(self, file, parent, name, itemtype):
+    def __init__(self, file, parent, name, itemtype, **kwargs):
         self.file = file
         self.parent = parent
         self.name = name
         self.itemtype = itemtype
         self._children = {}
+        # set special keyword arguments as attributes
+        self.kwargs = kwargs
+        # for n, v in kwargs.iteritems():
+            # setattr(self, n, v)
         parentnm = parent.fullname
         if parentnm.endswith('/'):
             parentnm = parentnm[:-1]
@@ -101,12 +105,15 @@ class Item(object):
     def __getattr__(self, name):
         """Access a child."""
         val = self.get(name)
+        if not val:
+            val = self.kwargs.get(name)
         return val
         
     def __dir__(self):
         """Return the list of attributes and children."""
         d = self._children.keys()
         d.extend(self._attrs())
+        d.extend(self.kwargs)
         return sorted(d)
 
         
@@ -223,11 +230,11 @@ class File(Item):
         self.iteminfos.append(ItemInfo(name, itemtype, shape, dtype))
         # add child
         if '/' not in name:
-            self._children[name] = Item(self, self, name, itemtype)
+            self._children[name] = Item(self, self, name, itemtype, shape=shape, dtype=dtype)
         else:
             parentnm, childnm = os.path.split(name)
             parent = self.get(parentnm)
-            child = Item(self, parent, childnm, itemtype)
+            child = Item(self, parent, childnm, itemtype, shape=shape, dtype=dtype)
             parent._add_child(childnm, child)
     
     def _visit(self):
