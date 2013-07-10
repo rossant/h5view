@@ -148,7 +148,10 @@ class Item(object):
         elif self.itemtype == 'dataset':
             item = self.file.f.get(self.fullname)
             shape, dtype = str(item.shape), str(item.dtype)
-            nbytes = item.dtype.itemsize * item.size
+            try:
+                nbytes = item.dtype.itemsize * item.size
+            except:
+                nbytes = item.dtype.itemsize * item.len()
             # s = '<Dataset "{0:s}": shape {1:s}, dtype "{2:s}">'.format(
                 # self.fullname, shape, dtype)
             s = '{0:s}: shape {1:s}, dtype "{2:s}", {3:s}'.format(
