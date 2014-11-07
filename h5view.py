@@ -105,7 +105,7 @@ class Item(object):
     def __getattr__(self, name):
         """Access a child."""
         val = self.get(name)
-        if not val:
+        if val is None:
             val = self.kwargs.get(name)
         return val
         
