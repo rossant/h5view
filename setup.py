@@ -1,6 +1,5 @@
 from setuptools import setup
 import os
-import sys
 
 here = os.path.abspath(os.path.dirname(__file__))
 try:
