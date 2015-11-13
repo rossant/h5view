@@ -20,7 +20,7 @@ Usage:
 In IPython, tab completion shows all direct children (groups, datasets,
 attributes) of the file or any item (group/dataset), making it quite
 convenient to interactively explore a HDF5 file.
-        
+
 """
 import h5py
 from collections import namedtuple
@@ -62,7 +62,7 @@ def format_size(num_bytes):
         output = '%.3g B' % num_bytes
     return output
 
-    
+
 class Item(object):
     """Represents a group or a dataset in the file."""
     def __init__(self, file, parent, name, itemtype, **kwargs):
@@ -79,16 +79,16 @@ class Item(object):
         if parentnm.endswith('/'):
             parentnm = parentnm[:-1]
         self.fullname = '/'.join([parentnm, name])
-        
+
     def _add_child(self, name, child):
         """Add a child."""
         self._children[name] = child
-        
+
     def children(self):
         """Return the list of children."""
         return self._children.keys()
-    
-    
+
+
     # Hierarchy methods
     # -----------------
     def get(self, name):
@@ -101,14 +101,14 @@ class Item(object):
             return self.get(parent).get(child)
         else:
             return self._children.get(name)
-    
+
     def __getattr__(self, name):
         """Access a child."""
         val = self.get(name)
         if val is None:
             val = self.kwargs.get(name)
         return val
-        
+
     def __dir__(self):
         """Return the list of attributes and children."""
         d = self._children.keys()
@@ -116,28 +116,28 @@ class Item(object):
         d.extend(self.kwargs)
         return sorted(d)
 
-        
+
     # Item methods
     # ------------
     def item(self):
         """Return the associated h5py object (group or dataset)."""
         return self.file.f.get(self.fullname)
-        
+
     def __getitem__(self, i):
         """For a dataset, access any part of the array."""
         if self.itemtype == 'dataset':
             return self.item()[i]
-        
+
     def _attr(self, name):
         """Return an attribute."""
         item = self.item()
         return item.attrs[name]
-        
+
     def _attrs(self):
         """Return the list of attributes."""
         return sorted(self.item().attrs.keys())
-        
-    
+
+
     # Display methods
     # ---------------
     def _get_repr(self):
@@ -168,8 +168,8 @@ class Item(object):
             repr = repr + "\n"
             repr += self.get(child).__repr__()
         return repr
-        
-        
+
+
 class Dataset(Item):
     def __init__(self, file, parent, name):
         super(Dataset, self).__init__(file, parent, name, 'dataset')
@@ -189,8 +189,8 @@ class File(Item):
         self.iteminfos = []
         # open and visit the file
         self.open()
-    
-    
+
+
     # I/O methods
     # -----------
     def open(self, filename=None):
@@ -202,22 +202,22 @@ class File(Item):
         if self.f is None and filename is not None:
             self.f = h5py.File(filename, 'r')
             self._visit()
-            
+
     def close(self):
         """Close the file."""
         if self.f is not None:
             self.f.close()
-        
+
     def __enter__(self):
         """Enter the file, to use with `with`."""
         # self.open()
         return self
-        
+
     def __exit__(self, type, value, tb):
         """Exit the file, to use with `with`."""
         self.close()
-    
-    
+
+
     # Exploration methods
     # -------------------
     def _visit_item(self, name):
@@ -239,7 +239,7 @@ class File(Item):
             parent = self.get(parentnm)
             child = Item(self, parent, childnm, itemtype, shape=shape, dtype=dtype)
             parent._add_child(childnm, child)
-    
+
     def _visit(self):
         """Visit the whole hierarchy of groups and datasets in the file."""
         if self.f is not None:
@@ -247,24 +247,24 @@ class File(Item):
         self.iteminfos = sorted(self.iteminfos, key=operator.itemgetter(0))
         return self.iteminfos
 
-    
+
     # Display methods
     # ---------------
     def __repr__(self):
-        """Return a complete pretty print representation of the file and 
+        """Return a complete pretty print representation of the file and
         all its groups, datasets and attributes."""
         filename = os.path.realpath(self.filename)
         s = '<HDF5 file "{0:s}", {1:s}>\n'.format(
             filename, format_size(os.path.getsize(filename)))
         s += super(File, self).__repr__()
         return s
-    
-        
+
+
 def open(filename):
     """Open a HDF5 file."""
     return File(filename)
 
-    
+
 if __name__ == '__main__':
     filename = 'test.h5'
     if not os.path.exists(filename):
